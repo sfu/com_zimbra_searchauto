@@ -79,6 +79,18 @@ function(val) {
 	}
 };
 
+ZmSearchAutoZimlet.prototype._removeFromHistoryList = 
+function(val) {
+    val = val.toLowerCase();
+    for (var i=0; i < this._searchHistoryList.length; i++) {
+        if (val === this._searchHistoryList[i].toLowerCase()) {
+            this._searchHistoryList.splice(i, 1);
+            break;
+        }
+    };
+    this.metaData.set("SearchAutoZimletHistory", this._searchHistoryList, null, new AjxCallback(this, this._handleSetSearchHistory));
+};
+
 ZmSearchAutoZimlet.prototype._handleSetSearchHistory =
 function(response) {
  	if(response.isException()) {
@@ -214,19 +226,21 @@ function() {
         return;
     }
     var cnt = 0;
+    var isActualResult = false;
     for (var el in result) {
         var val = result[el];
         var id;
         if (val == ZmSearchAutoZimlet.searchHistoryHdr || val == ZmSearchAutoZimlet.advSearchHdr) {
             id = "autoList_Hdr_" + cnt;
             li = li + "<li class='sa_autoListHdr' id='" + id + "'>" + val + "</li>";
-
+            isActualResult = !isActualResult;
         } else if(val.indexOf(ZmSearchAutoZimlet.noHistoryMatched) >=0) {
 	        id = "autoNoHistoryFoundItem_" + cnt;
             li = li + "<li id='" + id + "'>" + val + "</li>";
 		} else {
             id = "autoListItem_" + cnt;
-            li = li + "<li id='" + id + "'>" + val + "</li>";
+            var forget = isActualResult ? '<span class="sa_forget">Forget</span>' : '';
+            li = li + "<li id='" + id + "'>" + val + forget + "</li>";
             cnt++;//increment
         }
         this.idAndVal[id] = val.replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", "");
@@ -272,7 +286,7 @@ function() {
 
 ZmSearchAutoZimlet.prototype._onmouseover =
 function(id) {
-    if (this._selectedItemId != "") {
+    if (this._selectedItemId) {
         //when mouse is used after some down-arrow selection, clear the down-arrow selection.
         document.getElementById(this._selectedItemId).style.backgroundColor = "white";
     }
@@ -289,7 +303,25 @@ ZmSearchAutoZimlet.prototype._onclick =
 function() {
     if (this._selectedItemId != "") {//when one of the items is selected..
         if (!this._listCollapsed) {//advanced search or searchHistory was selected..
-            if (this._selectedItemId != "") {//replace the selected list's value
+            if (this._selectedItemId != "") {//replace the selected list's value            
+                // if user clicked "forget"
+                if (event.target.className === 'sa_forget') {
+                    this._removeFromHistoryList(this.idAndVal[this._selectedItemId]);
+                    // remove DOM node
+                    this._selectedItemId = this.searchField.value = this._noFldrQuery = '';
+                    var targetEl = event.currentTarget;
+                    var isOnlyResult = ((event.currentTarget.previousSibling.className.indexOf('sa_autoListHdr') >= 0) && (event.currentTarget.nextSibling.className.indexOf('sa_autoListHdr') >= 0));
+                    if (isOnlyResult) {
+                        targetEl.innerHTML = ZmSearchAutoZimlet.noHistoryMatched;
+                        targetEl.onclick = null;
+                        targetEl.onmouseover = null;
+                        targetEl.onmouseout = null;
+                        targetEl.style.backgroundColor = '#FFF';
+                    } else {
+                        targetEl.parentNode.removeChild(targetEl);
+                    }
+                    return false;
+                }
                 this.searchField.value = this.idAndVal[this._selectedItemId];
             }
         }

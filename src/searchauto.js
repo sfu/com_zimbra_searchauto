@@ -305,20 +305,22 @@ function() {
         if (!this._listCollapsed) {//advanced search or searchHistory was selected..
             if (this._selectedItemId != "") {//replace the selected list's value            
                 // if user clicked "forget"
-                if (event.target.className === 'sa_forget') {
+                var ev = window.event == undefined ? arguments[1] : window.event;
+                var clickTarget = ev.srcElement || ev.target;
+                if (clickTarget.className === 'sa_forget') {  // user clicked on the Forget text
                     this._removeFromHistoryList(this.idAndVal[this._selectedItemId]);
-                    // remove DOM node
+                    // remove DOM node (the LI)
                     this._selectedItemId = this.searchField.value = this._noFldrQuery = '';
-                    var targetEl = event.currentTarget;
-                    var isOnlyResult = ((event.currentTarget.previousSibling.className.indexOf('sa_autoListHdr') >= 0) && (event.currentTarget.nextSibling.className.indexOf('sa_autoListHdr') >= 0));
+                    var parentNode = clickTarget.parentNode;
+                    var isOnlyResult = ((clickTarget.parentNode.previousSibling.className.indexOf('sa_autoListHdr') >= 0) && (clickTarget.parentNode.nextSibling.className.indexOf('sa_autoListHdr') >= 0));
                     if (isOnlyResult) {
-                        targetEl.innerHTML = ZmSearchAutoZimlet.noHistoryMatched;
-                        targetEl.onclick = null;
-                        targetEl.onmouseover = null;
-                        targetEl.onmouseout = null;
-                        targetEl.style.backgroundColor = '#FFF';
+                        parentNode.innerHTML = ZmSearchAutoZimlet.noHistoryMatched;
+                        parentNode.onclick = null;
+                        parentNode.onmouseover = null;
+                        parentNode.onmouseout = null;
+                        parentNode.style.backgroundColor = '#FFF';
                     } else {
-                        targetEl.parentNode.removeChild(targetEl);
+                        parentNode.parentNode.removeChild(parentNode);
                     }
                     return false;
                 }

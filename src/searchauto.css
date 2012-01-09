@@ -54,8 +54,8 @@ color:purple;
 
 .sa_forget {
     color: #BFBFBF;
-    display: inline-block;
-    float: right;
+    position: absolute;
+    right: 10px;
 }
 
 .sa_forget:hover {

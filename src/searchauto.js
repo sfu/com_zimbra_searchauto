@@ -202,9 +202,9 @@ function(result) {
 			//set the x,y & width of the autocomplete popup
     if (input.offsetParent) {
         var inputPos = this._findPos(document.getElementById('mainSearchInputFieldID'));
-        el.style.left = inputPos[0];
-        el.style.top = inputPos[1] + input.offsetHeight;
-        el.style.width = document.getElementById('mainSearchInputFieldID').scrollWidth - 2;
+        el.style.left = inputPos[0] + 'px';
+        el.style.top = inputPos[1] + input.offsetHeight + 'px';
+        el.style.width = document.getElementById('mainSearchInputFieldID').scrollWidth - 2 + 'px';
     }
 };
 
